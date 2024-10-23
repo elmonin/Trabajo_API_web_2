@@ -1,7 +1,14 @@
 import express from "express";
 import PDFDocument from 'pdfkit';
 import {read, write } from "../src/utils/files.js";
+import Joi from 'joi';
 
+const productoSchema = Joi.object({
+    nombre: Joi.string().required(),
+    descripcion: Joi.string().optional(),
+    precio: Joi.number().required(),
+    categoria: Joi.string().optional(),
+});
 
 const validarProducto = (producto) => {
     return productoSchema.validate(producto);
@@ -17,7 +24,7 @@ productosFileRouter.get('/', (req, res) => {
     res.end(JSON.stringify(productos));
 });
 
-productosFileRouter.get(':id', (req, res) => {
+productosFileRouter.get('/:id', (req, res) => {
     const productos = read();
     const producto = productos.find(producto => producto.id === parseInt(req.params.id));
     if (producto) {
@@ -27,7 +34,7 @@ productosFileRouter.get(':id', (req, res) => {
     }
 });
 
-productosFileRouter.post('/', (req, res) => {
+productosFileRouter.post('/:id', (req, res) => {
     const { error } = validarProducto(req.body);
     if (error) {
         return res.status(400).json({
